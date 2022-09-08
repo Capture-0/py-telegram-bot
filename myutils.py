@@ -12,6 +12,7 @@ TOKEN = "253284677:AAGH-nxJuBFmuHWY8RL4E49pHgP-pvWpUkI"
 bot = telebot.TeleBot(TOKEN)
 DATABASE = "data.db"
 
+
 class Database:
     connectionString = None
     dry = False
@@ -48,6 +49,7 @@ class Database:
 
     def user_data(self, user_id):
         return self.execute("select * from users where user_id = ?", (user_id,))[0]
+
 
 class User:
     id = None
@@ -95,6 +97,7 @@ class User:
         j[key] = value
         self.db.execute(
             "update users set data = ? where user_id = ?", (json.dumps(j), self.id))
+
 
 class Process:
     value, tree, user = None, None, None
@@ -180,12 +183,18 @@ class Process:
                 ma = ['Okay']
         if self.can_back():
             ma.append(n["meta"]["back"])
+        if "meta" in n and "markup" in n["meta"]:
+            if n["meta"]["markup"] == "col":
+                ma = [[item for item in ma]]
+            else:
+                pass  # ma = [item for item in ma]
         return get_markup_by_array(ma)
 
     def can_back(self):
         n = self.tree.current
         return "meta" in n and "back" in n["meta"]
-        
+
+
 class Tree:
     tree, current, user, p = None, None, None, None
 
@@ -252,9 +261,11 @@ class Tree:
         else:
             return None
 
+
 def command(cmd, uid):
     r = "python3 main.py " + str(uid) + " " + cmd
     return subprocess.Popen(r.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
+
 
 def parse_fstr(obj, update):
     if "fstr" in obj and "args" in obj:
@@ -268,6 +279,7 @@ def parse_fstr(obj, update):
     else:
         return None
 
+
 def newnode_callback(tree):
     if "meta" in tree.current:
         if "execute" in tree.current["meta"]:
@@ -278,17 +290,20 @@ def newnode_callback(tree):
                 for i in e:
                     command(i, tree.user.id)
 
+
 def download(url, name):
     r = requests.get(url, allow_redirects=True)
     f = open(name, 'wb')
     f.write(r.content)
     f.close()
 
+
 def tgdownload(file_id):
     gf = bot.get_file(file_id)
     download("https://api.telegram.org/file/bot%s/%s" %
              (TOKEN, gf.file_path), 'testfile')
     return gf
+
 
 def get_markup_by_array(val):
     if type(val) == list:
@@ -302,13 +317,16 @@ def get_markup_by_array(val):
         return markup
     return None
 
+
 def m(pattern, inp, insensitive=False):
     if insensitive:
         return re.findall(pattern, inp, re.I)
     return re.findall(pattern, inp)
 
+
 def randstr(l=16, chars="abcdef0123456789"):
     return ''.join(random.choices(chars, k=l))
+
 
 def j(p):
     f = open(p, "r")

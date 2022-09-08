@@ -1,6 +1,6 @@
 {
     "name": "root",
-    "say": "Yirumaorgbot helps you find your match ^^\n\nalready design to be easy on use; by setting up your identification matching people will find you as well as you could find :D",
+    "say": "💫 Yirumaorgbot helps you find your match ^^\n\nalready designed to be easy on use; by setting up your identification matching people will find you as well as you could find :D",
     "next": [{
             "name": "menu",
             "meta": {
@@ -11,32 +11,33 @@
             "next": [{
                     "name": "profiles",
                     "meta": {
-                        "execute": "e profile"
+                        "execute": "e profile",
+                        "markup": "col"
                     },
-                    "title": "Explore profiles ^^",
+                    "title": "🚀 Explore profiles",
                     "next": [{
                             "name": "like",
                             "meta": {
                                 "execute": "e like"
                             },
-                            "title": "like",
+                            "title": "❤️",
                             "next": "root/menu/profiles"
                         },
                         {
                             "name": "next",
-                            "title": "next",
+                            "title": "⏭️",
                             "next": "root/menu/profiles"
                         },
                         {
                             "name": "exit",
-                            "title": "home",
+                            "title": "🏛 Home",
                             "next": "root/menu"
                         }
                     ]
                 },
                 {
                     "name": "chat",
-                    "title": "Online chat :D",
+                    "title": "💬 Online chat",
                     "say": "Coming Soon ...",
                     "next": "root/menu"
                 },
@@ -45,11 +46,11 @@
                     "meta": {
                         "back": "back"
                     },
-                    "title": "Options",
+                    "title": "⚙️ Options",
                     "say": "select an option",
                     "next": [{
                             "name": "togglediscover",
-                            "title": "toggle search discoverability",
+                            "title": "🔎 Toggle search discoverability",
                             "say": {
                                 "fstr": "Toggle done successfuly,\n$0",
                                 "args": ["e togglediscover"]
@@ -58,7 +59,7 @@
                         },
                         {
                             "name": "editprof",
-                            "title": "edit profile",
+                            "title": "👤 Profile",
                             "say": "select an option",
                             "expect": {
                                 "type": "list",
@@ -72,7 +73,7 @@
                             "next": {
                                 "name": "extra",
                                 "meta": {
-                                    "execute":"e editprofselect"
+                                    "execute": "e editprofselect"
                                 },
                                 "next": [{
                                         "name": "name",
@@ -136,7 +137,7 @@
                                         },
                                         "next": {
                                             "name": "done",
-                                            "say": "photo has be changed", 
+                                            "say": "photo has be changed",
                                             "next": "root/menu/options/editprof"
                                         }
                                     },
@@ -150,7 +151,7 @@
                                         },
                                         "next": {
                                             "name": "done",
-                                            "say": "description has be changed", 
+                                            "say": "description has be changed",
                                             "next": "root/menu/options/editprof"
                                         }
                                     },
@@ -175,12 +176,12 @@
                                         "next": "root/menu"
                                     }
                                 ]
-                            } 
+                            }
                         },
                         {
                             "name": "support",
-                            "title": "community / support / contribution",
-                            "say": "done",
+                            "title": "💌 community / support / contribution",
+                            "say": "Coming Soon ...",
                             "next": "root/menu"
                         }
                     ]
@@ -190,7 +191,7 @@
         {
             "name": "intro",
             "title": "Okay",
-            "say": "let's start\nRemember that on the Internet people can impersonate others.\nThe bot does not ask for personal data and does not identify users by any documents. By continuing, you agree to the use of the bot at your own risk.",
+            "say": "let's start\n❗️ Remember that on the Internet people can impersonate others; The bot does'nt authenticate to identify users.\nBy continuing, you agree to the use of the bot at your own risk.",
             "expect": {
                 "type": "list",
                 "list": ["agree"],
@@ -198,7 +199,7 @@
             },
             "next": {
                 "name": "name",
-                "say": "Sweet !\n\nnow we're setting up your identification, you may change some of these later.\nWhat is your name",
+                "say": "Sweet ^^\n\nnow we're setting up your identification, you may change some of these later.\nWhat is your name",
                 "expect": {
                     "type": "text",
                     "op": "sd name [MSG]"
@@ -256,11 +257,11 @@
                                             "name": "menu",
                                             "meta": {
                                                 "execute": [
-                                                    "e self", 
+                                                    "e self",
                                                     "sd status status_up"
                                                 ]
                                             },
-                                            "say": "done, your profile will be shown like this",
+                                            "say": "done ✔️, your profile will be shown like this",
                                             "next": "root/menu"
                                         }
                                     }
