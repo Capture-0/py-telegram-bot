@@ -1,0 +1,275 @@
+{
+    "name": "root",
+    "say": "Yirumaorgbot helps you find your match ^^\n\nalready design to be easy on use; by setting up your identification matching people will find you as well as you could find :D",
+    "next": [{
+            "name": "menu",
+            "meta": {
+                "index": 0
+            },
+            "title": "supersecret",
+            "say": "select an option",
+            "next": [{
+                    "name": "profiles",
+                    "meta": {
+                        "execute": "e profile"
+                    },
+                    "title": "Explore profiles ^^",
+                    "next": [{
+                            "name": "like",
+                            "meta": {
+                                "execute": "e like"
+                            },
+                            "title": "like",
+                            "next": "root/menu/profiles"
+                        },
+                        {
+                            "name": "next",
+                            "title": "next",
+                            "next": "root/menu/profiles"
+                        },
+                        {
+                            "name": "exit",
+                            "title": "home",
+                            "next": "root/menu"
+                        }
+                    ]
+                },
+                {
+                    "name": "chat",
+                    "title": "Online chat :D",
+                    "say": "Coming Soon ...",
+                    "next": "root/menu"
+                },
+                {
+                    "name": "options",
+                    "meta": {
+                        "back": "back"
+                    },
+                    "title": "Options",
+                    "say": "select an option",
+                    "next": [{
+                            "name": "togglediscover",
+                            "title": "toggle search discoverability",
+                            "say": {
+                                "fstr": "Toggle done successfuly,\n$0",
+                                "args": ["e togglediscover"]
+                            },
+                            "next": "root/menu"
+                        },
+                        {
+                            "name": "editprof",
+                            "title": "edit profile",
+                            "say": "select an option",
+                            "expect": {
+                                "type": "list",
+                                "list": [
+                                    ["name", "age", "city", "photo"],
+                                    ["description", "request gender audition"],
+                                    ["demo", "back"]
+                                ],
+                                "op": "none"
+                            },
+                            "next": {
+                                "name": "extra",
+                                "meta": {
+                                    "execute":"e editprofselect"
+                                },
+                                "next": [{
+                                        "name": "name",
+                                        "title": "None",
+                                        "say": "What is your name?",
+                                        "expect": {
+                                            "type": "text",
+                                            "op": "sd name [MSG]"
+                                        },
+                                        "next": {
+                                            "name": "done",
+                                            "say": {
+                                                "fstr": "name has been changed to, $0",
+                                                "args": ["gd name"]
+                                            },
+                                            "next": "root/menu/options/editprof"
+                                        }
+                                    },
+                                    {
+                                        "name": "age",
+                                        "title": "None",
+                                        "say": "Your age?",
+                                        "expect": {
+                                            "type": "text",
+                                            "pattern": "^\\d+$",
+                                            "op": "s age [MSG]"
+                                        },
+                                        "next": {
+                                            "name": "done",
+                                            "say": {
+                                                "fstr": "age has been changed to, $0",
+                                                "args": ["g age"]
+                                            },
+                                            "next": "root/menu/options/editprof"
+                                        }
+                                    },
+                                    {
+                                        "name": "city",
+                                        "title": "None",
+                                        "say": "Your city?",
+                                        "expect": {
+                                            "type": "text",
+                                            "op": "sd city [MSG]"
+                                        },
+                                        "next": {
+                                            "name": "done",
+                                            "say": {
+                                                "fstr": "city has be changed to, $0",
+                                                "args": ["gd city"]
+                                            },
+                                            "next": "root/menu/options/editprof"
+                                        }
+                                    },
+                                    {
+                                        "name": "photo",
+                                        "title": "None",
+                                        "say": "Send a photo",
+                                        "expect": {
+                                            "type": "file",
+                                            "op": "sd photo [MSG]"
+                                        },
+                                        "next": {
+                                            "name": "done",
+                                            "say": "photo has be changed", 
+                                            "next": "root/menu/options/editprof"
+                                        }
+                                    },
+                                    {
+                                        "name": "desc",
+                                        "title": "None",
+                                        "say": "Send a breif description of yourself (bio)",
+                                        "expect": {
+                                            "type": "text",
+                                            "op": "sd description [MSG]"
+                                        },
+                                        "next": {
+                                            "name": "done",
+                                            "say": "description has be changed", 
+                                            "next": "root/menu/options/editprof"
+                                        }
+                                    },
+                                    {
+                                        "name": "gender",
+                                        "title": "None",
+                                        "say": "conatct admin @C4pture",
+                                        "next": "root/menu"
+                                    },
+                                    {
+                                        "name": "demo",
+                                        "title": "None",
+                                        "meta": {
+                                            "execute": "e self"
+                                        },
+                                        "next": "root/menu/options/editprof"
+                                    },
+                                    {
+                                        "name": "back",
+                                        "title": "None",
+                                        "say": "returned to menu",
+                                        "next": "root/menu"
+                                    }
+                                ]
+                            } 
+                        },
+                        {
+                            "name": "support",
+                            "title": "community / support / contribution",
+                            "say": "done",
+                            "next": "root/menu"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "intro",
+            "title": "Okay",
+            "say": "let's start\nRemember that on the Internet people can impersonate others.\nThe bot does not ask for personal data and does not identify users by any documents. By continuing, you agree to the use of the bot at your own risk.",
+            "expect": {
+                "type": "list",
+                "list": ["agree"],
+                "op": "none"
+            },
+            "next": {
+                "name": "name",
+                "say": "Sweet !\n\nnow we're setting up your identification, you may change some of these later.\nWhat is your name",
+                "expect": {
+                    "type": "text",
+                    "op": "sd name [MSG]"
+                },
+                "next": {
+                    "name": "age",
+                    "say": "Your age?",
+                    "expect": {
+                        "type": "text",
+                        "pattern": "^\\d+$",
+                        "op": "s age [MSG]"
+                    },
+                    "next": {
+                        "name": "city",
+                        "say": "Your city?",
+                        "expect": {
+                            "type": "text",
+                            "op": "sd city [MSG]"
+                        },
+                        "next": {
+                            "name": "photo",
+                            "say": "Send a photo",
+                            "expect": {
+                                "type": "file",
+                                "op": "sd photo [MSG]"
+                            },
+                            "next": {
+                                "name": "gender",
+                                "say": "what is your gender?\n\nchoose your gender and the gender you'r attracted to correctly you won't be able to change in later!(other than messaging admin)\nthe reason is to guarantee that you'll find the correct gender ;)",
+                                "expect": {
+                                    "type": "list",
+                                    "list": [
+                                        "male", "female"
+                                    ],
+                                    "op": "s gender [MSG]"
+                                },
+                                "next": {
+                                    "name": "attracted",
+                                    "say": "Who are you looking for? (choose wisely !)",
+                                    "expect": {
+                                        "type": "list",
+                                        "list": [
+                                            "male", "female"
+                                        ],
+                                        "op": "sd attraction [MSG]"
+                                    },
+                                    "next": {
+                                        "name": "desc",
+                                        "say": "a breif description of yourself (bio)",
+                                        "expect": {
+                                            "type": "text",
+                                            "op": "sd description [MSG]"
+                                        },
+                                        "next": {
+                                            "name": "menu",
+                                            "meta": {
+                                                "execute": [
+                                                    "e self", 
+                                                    "sd status status_up"
+                                                ]
+                                            },
+                                            "say": "done, your profile will be shown like this",
+                                            "next": "root/menu"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
