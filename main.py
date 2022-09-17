@@ -6,6 +6,7 @@
 #     sd: set data
 #     q: database query
 #     e: execute a preset
+#     m: markup
 
 # variables: wrapped in []
 #     ID: user id
@@ -19,7 +20,10 @@ from myutils import *
 import json
 import telebot
 
-TOKEN = "253284677:AAGH-nxJuBFmuHWY8RL4E49pHgP-pvWpUkI"
+CONF = j("conf.json")
+TOKEN = CONF["TOKEN"]
+DATABASE = CONF["DB"]
+MAP = CONF["MAP"]
 bot = telebot.TeleBot(TOKEN)
 a = sys.argv
 if 0:
@@ -29,7 +33,7 @@ if len(a) < 4:
 
 uid = a[1]
 u = User(uid)
-t = Tree(j("map.json"), u)
+t = Tree(j(MAP), u)
 markup = Process(None, t, u).markup()
 msg = u.last_message
 a = a[2:]
@@ -42,6 +46,32 @@ def sm(msg, mu = True):
         bot.send_message(uid, msg, reply_markup=markup)
     else:
         bot.send_message(uid, msg)
+
+
+def sendprofile(id, toid):
+    usr = User(id)
+    ud = usr.gd()
+    cap = "%s, %s, %s\n%s" % (ud["name"], usr.g(
+        "age"), ud["city"], ud["description"])
+    usr.sd("status", "status_up")
+    bot.send_photo(toid, photo=ud["photo"], caption=cap, reply_markup=markup)
+
+
+def treenext(nm):
+    global markup, t, msg
+    t.next(nm)
+    newnode_callback(t)
+    markup = t.process(msg).markup()
+    u.send_message(t.process(msg).output())
+
+
+def treeroute(pth):
+    global markup, t, msg
+    t.route(pth)
+    newnode_callback(t)
+    markup = t.process(msg).markup()
+    u.send_message(t.process(msg).output())
+
 
 def main():
     global markup
@@ -61,6 +91,10 @@ def main():
         bot.send_message(uid, str(db.execute(" ".join(a[1:]))))
         #pass
     # e.g. python3 main.py [ID] e userlastseen / set result to show in output
+    elif op == "m":
+        if a[1] == "users":
+            result = ["capture", "black m4n", "hungry brain"]
+        result = json.dumps({"list": result})
     elif op == "e":
         if a[1] == "profile":
             puid = db.execute("select user_id from users where user_id != ? and data like '%\"status_up\"%' ORDER BY RANDOM() LIMIT 1",(uid, ))[0]["user_id"]
@@ -94,9 +128,42 @@ def main():
             elif m == "back":
                 t.next("back")
                 pth = "back"
-            t.next(pth)
-            newnode_callback(t)
-            markup = Process(None, t, u).markup()
-            sm(t.process(msg).output(), 1)
+            treenext(pth)
+        elif a[1] == "profilecompleted":
+            sendprofile(u.id, u.id)
+            u.sd("status", "status_up")
+            result = "done ✔️, your profile will be shown like this"
+        elif a[1] == "togglediscover":
+            u.sd("status", "status_down" if u.gd(
+                "status") == "status_up" else "status_up")
+            result = "You'r profile won't be indexed in profile explores" if u.gd(
+                "status") == "status_up" else "You'r profile is now discoverable in profile explores"
+        elif a[1] == "like_if":
+            l = u.gd("likes")
+            res = ""
+            result = "1"
+            if l == None or l == "." or l == "":
+                res = "Currently you have no pending like"
+                result = "0"
+            elif len(l.split(",")) == 1:
+                res = "Someone liked you,\nwhat do you want to do"
+            elif len(l.split(",")) > 1:
+                res = "You have %s likes,\nwhat do you want to do" % len(
+                    l.split(","))
+            sm(res)
+        elif a[1] == "like_show":
+            l = u.gd("likes").split(",")
+            sendprofile(l[0], u.id)
+            u.sd("likes", ",".join(l[1:]))
+            u.sd("last_contact", l[0])
+        elif a[1] == "reactedlike":
+            l = u.gd("likes")
+            m = msg["text"]
+            if m == "👍":
+                sm(u.gd("last_contact"))
+            if l == None or l == "." or l == "":
+                treenext("")
+            else:
+                treeroute("root/liked/check")
     return result
 print(main())

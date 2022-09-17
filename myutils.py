@@ -1,5 +1,4 @@
 # users table: CREATE TABLE users (user_id TEXT UNIQUE,age INTEGER,gender TEXT,coordinate TEXT,created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,tree TEXT,ptree TEXT,last_message TEXT,data TEXT)
-import urllib.parse
 import subprocess
 import requests
 import telebot
@@ -98,6 +97,14 @@ class User:
         self.db.execute(
             "update users set data = ? where user_id = ?", (json.dumps(j), self.id))
 
+    def send_message(self, msg, markup=None):
+        if msg == None:
+            return
+        if markup == None:
+            bot.send_message(self.id, msg)
+        else:
+            bot.send_message(self.id, msg, reply_markup=markup)
+
 
 class Process:
     value, tree, user = None, None, None
@@ -108,91 +115,112 @@ class Process:
         self.user = user
 
     def input(self):  # this function checks if the input is correct returns the next level node name else returns None
-        v = self.value
         n = self.tree.current
-        uid = str(v.chat.id)
-        msg = v.text
-        if self.can_back() and msg == n["meta"]["back"]:
-            #bot.send_message(self.user.id, "backed")
-            self.tree.route("/".join(self.tree.path.split("/")[0:-1]))
-            return None
-        r = None
-        if "expect" not in n:
-            if type(n["next"]) == list:
-                for i in n["next"]:
-                    if i["title"] == msg:
-                        r = i["name"]
-            elif type(n["next"]) == str:
-                r = "@" + n["next"]
-            elif type(n["next"]) == dict:
+        msg = self.value
+        msg_text = msg.text
+        if "expect" in n:
+            ex = n["expect"]
+            tp = ex["type"].lower()
+            op = ex["op"].replace("[MSG]", msg_text)
+            r = None
+            if tp == "text":
+                if "pattern" in ex and not m(ex["pattern"], msg_text):
+                    return None
+                if "markup" in ex:
+                    for i in ex["markup"]:
+                        if msg_text == i["title"]:
+                            self.command(i["op"])
+                            return self.next(False)
                 r = n["next"]["name"]
-        elif n["expect"]["type"] == "list":
-            for i in n["expect"]["list"]:
-                if (type(i) == list and msg in i) or (msg in n["expect"]["list"]):
-                    op = n["expect"]["op"].replace("[MSG]", msg)
-                    command(op, uid)
+            elif tp == "markup":
+                if self.in_markup(msg_text):
+                    r = self.next()
+            elif tp == "photo":
+                if msg.photo:
+                    op = op.replace("[PHOTO]", msg.photo[0].file_id)
                     r = n["next"]["name"]
-                    break
-        elif n["expect"]["type"] == "text":
-            if "pattern" in n["expect"] and not m(n["expect"]["pattern"], msg):
-                return None
-            op = n["expect"]["op"].replace("[MSG]", msg)
-            command(op, uid)
-            r = n["next"]["name"]
-        elif n["expect"]["type"] == "file":
-            if v.photo:
-                r = n["next"]["name"]
-                command(n["expect"]["op"].replace(
-                    "[MSG]", v.photo[0].file_id), uid)
-                r = n["next"]["name"]
-        return r
+            self.command(op)
+            return r
+        else:
+            return self.next()
+
+    def next(self, check_markup=True):
+        n = self.tree.current
+        if "markup" in n and type(n["next"]) == list and check_markup:
+            m = n["markup"]
+            a = []
+            for i in m:
+                if type(i) == str:
+                    a.append(i)
+                else:
+                    a += [j for j in i]
+            for i in a:
+                if self.value.text == i["title"]:
+                    if "if" not in i or self.command(i["if"]) == "1":
+                        return i["next"]
+        elif type(n["next"]) == str:
+            return "@" + n["next"]
+        elif type(n["next"]) == dict:
+            return n["next"]["name"]
+        return None
 
     def output(self):  # this function returns what should be shown to user
         if "say" not in self.tree.current:
             return None
         o = self.tree.current["say"]
-        id = str(self.tree.user.id)
         if type(o) == str:
-            return o
+            if o[0] == "/":
+                self.command(o[1:])
+                return None
+            else:
+                return o
         elif type(o) == dict:
-            return parse_fstr(o, self.value)
+            return parse_fstr(o, self)
         return None
 
     def markup(self):
         n = self.tree.current
         ma = []
-        if "expect" in n and n["expect"]["type"] == "list":
-            if type(n["next"]) == list:
-                raise Exception(
-                    "[map-error] - Cant add both expected list and next titles values")
-            else:
-                ma = n["expect"]["list"]
+        if "markup" in n:
+            m = n["markup"]
+            if type(m) == list:  # if makrup is an array
+                if type(n["next"]) != list:
+                    ma = m
+                else:  # parse array of objects
+                    for i in m:
+                        if type(i) == list:
+                            ma.append([j["title"] for j in i])
+                        elif type(i) == dict:
+                            ma.append(i["title"])
+                        else:
+                            raise Exception(
+                                "all elements in the array must be object or array of objects")
+            else:  # if makrup is a string
+                if m == "col":
+                    ma = [[i["name"] for i in n["next"]]]
+                elif m == "row":
+                    ma = [i["name"] for i in n["next"]]
+                else:
+                    ma = json.loads(self.command("m %s" % m))["list"]
         else:
-            if type(n["next"]) == list:
-                for nx in n["next"]:
-                    if "meta" in nx and "index" in nx["meta"]:
-                        idx = nx["meta"]["index"]
-                        if type(idx) == str:
-                            if command(idx, self.user.id) == "1":
-                                ma.append(nx["title"])
-                        elif idx == 1:
-                            ma.append(nx["title"])
-                    else:
-                        ma.append(nx["title"])
-            elif type(n["next"]) == str:
-                ma = ['Okay']
-        if self.can_back():
-            ma.append(n["meta"]["back"])
-        if "meta" in n and "markup" in n["meta"]:
-            if n["meta"]["markup"] == "col":
-                ma = [[item for item in ma]]
-            else:
-                pass  # ma = [item for item in ma]
-        return get_markup_by_array(ma)
+            ma = None
+        return ma
 
-    def can_back(self):
-        n = self.tree.current
-        return "meta" in n and "back" in n["meta"]
+    def in_markup(self, title):
+        m = []
+        for i in self.markup():
+            if type(i) == str:
+                m.append(i)
+            else:
+                m += [j for j in i]
+        return title in m
+
+    def command(self, cmd, uid=None):
+        id = uid
+        if id == None:
+            id = str(self.user.id)
+        r = "python3 main.py " + id + " " + cmd
+        return subprocess.Popen(r.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
 
 
 class Tree:
@@ -242,6 +270,7 @@ class Tree:
             return None
 
     def route(self, path):
+        src = {"node": self.current, "path": self.path}
         self.current = self.tree
         self.path = self.tree["name"]
         if path == self.tree["name"]:
@@ -250,6 +279,9 @@ class Tree:
         for i in path.split('/')[1:]:
             if self.next(i) == None:
                 break
+        if "meta" in self.current and "if" in self.current["meta"] and Process(None, self, self.user).command(self.current["meta"]["if"], self.user.id) != "1":
+            self.current = src["node"]
+            self.path = src["path"]
 
     def process(self, value=None):
         if self.user:
@@ -260,24 +292,6 @@ class Tree:
             return self.p
         else:
             return None
-
-
-def command(cmd, uid):
-    r = "python3 main.py " + str(uid) + " " + cmd
-    return subprocess.Popen(r.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
-
-
-def parse_fstr(obj, update):
-    if "fstr" in obj and "args" in obj:
-        res = obj["fstr"]
-        for i in range(len(obj["args"])):
-            cmd = obj["args"][i].replace("[ID]", str(update.chat.id)).replace(
-                "[MSG]", str(update.text))
-            res = res.replace("$%s" % i, command(
-                obj["args"][i], update.chat.id))
-        return res
-    else:
-        return None
 
 
 def newnode_callback(tree):
@@ -316,6 +330,18 @@ def get_markup_by_array(val):
                 markup.row(i)
         return markup
     return None
+
+
+def parse_fstr(obj, process):
+    if "fstr" in obj and "args" in obj:
+        args = obj["args"]
+        res = obj["fstr"]
+        for i in range(len(args)):
+            executed = process.command(args[i], process.user.id)
+            res = res.replace("$%s" % i, executed)
+        return res
+    else:
+        return None
 
 
 def m(pattern, inp, insensitive=False):

@@ -1,43 +1,44 @@
 {
     "name": "root",
     "say": "💫 Yirumaorgbot helps you find your match ^^\n\nalready designed to be easy on use; by setting up your identification matching people will find you as well as you could find :D",
+    "markup": [{
+        "title": "Okay",
+        "next": "intro"
+    }],
     "next": [{
             "name": "menu",
-            "meta": {
-                "index": 0
-            },
-            "title": "supersecret",
             "say": "select an option",
             "next": [{
                     "name": "profiles",
-                    "meta": {
-                        "execute": "e profile",
-                        "markup": "col"
-                    },
-                    "title": "🚀 Explore profiles",
+                    "say": "/e profile",
+                    "markup": [{
+                            "title": "like",
+                            "next": "like"
+                        },
+                        {
+                            "title": "next",
+                            "next": "next"
+                        },
+                        {
+                            "title": "home",
+                            "next": "@root/menu"
+                        }
+                    ],
                     "next": [{
                             "name": "like",
                             "meta": {
                                 "execute": "e like"
                             },
-                            "title": "❤️",
                             "next": "root/menu/profiles"
                         },
                         {
                             "name": "next",
-                            "title": "⏭️",
                             "next": "root/menu/profiles"
-                        },
-                        {
-                            "name": "exit",
-                            "title": "🏛 Home",
-                            "next": "root/menu"
                         }
                     ]
                 },
                 {
                     "name": "chat",
-                    "title": "💬 Online chat",
                     "say": "Coming Soon ...",
                     "next": "root/menu"
                 },
@@ -46,11 +47,9 @@
                     "meta": {
                         "back": "back"
                     },
-                    "title": "⚙️ Options",
                     "say": "select an option",
                     "next": [{
                             "name": "togglediscover",
-                            "title": "🔎 Toggle search discoverability",
                             "say": {
                                 "fstr": "Toggle done successfuly,\n$0",
                                 "args": ["e togglediscover"]
@@ -59,7 +58,6 @@
                         },
                         {
                             "name": "editprof",
-                            "title": "👤 Profile",
                             "say": "select an option",
                             "expect": {
                                 "type": "list",
@@ -77,7 +75,6 @@
                                 },
                                 "next": [{
                                         "name": "name",
-                                        "title": "None",
                                         "say": "What is your name?",
                                         "expect": {
                                             "type": "text",
@@ -94,7 +91,6 @@
                                     },
                                     {
                                         "name": "age",
-                                        "title": "None",
                                         "say": "Your age?",
                                         "expect": {
                                             "type": "text",
@@ -112,7 +108,6 @@
                                     },
                                     {
                                         "name": "city",
-                                        "title": "None",
                                         "say": "Your city?",
                                         "expect": {
                                             "type": "text",
@@ -129,7 +124,6 @@
                                     },
                                     {
                                         "name": "photo",
-                                        "title": "None",
                                         "say": "Send a photo",
                                         "expect": {
                                             "type": "file",
@@ -143,7 +137,6 @@
                                     },
                                     {
                                         "name": "desc",
-                                        "title": "None",
                                         "say": "Send a breif description of yourself (bio)",
                                         "expect": {
                                             "type": "text",
@@ -157,13 +150,11 @@
                                     },
                                     {
                                         "name": "gender",
-                                        "title": "None",
                                         "say": "conatct admin @C4pture",
                                         "next": "root/menu"
                                     },
                                     {
                                         "name": "demo",
-                                        "title": "None",
                                         "meta": {
                                             "execute": "e self"
                                         },
@@ -171,7 +162,6 @@
                                     },
                                     {
                                         "name": "back",
-                                        "title": "None",
                                         "say": "returned to menu",
                                         "next": "root/menu"
                                     }
@@ -180,23 +170,158 @@
                         },
                         {
                             "name": "support",
-                            "title": "💌 community / support / contribution",
                             "say": "Coming Soon ...",
                             "next": "root/menu"
+                        },
+                        {
+                            "name": "likes",
+                            "next": "root/liked"
                         }
                     ]
                 }
             ]
         },
         {
-            "name": "intro",
-            "title": "Okay",
-            "say": "let's start\n❗️ Remember that on the Internet people can impersonate others; The bot does'nt authenticate to identify users.\nBy continuing, you agree to the use of the bot at your own risk.",
-            "expect": {
-                "type": "list",
-                "list": ["agree"],
-                "op": "none"
+            "name": "liked",
+            "meta": {
+                "if": "e like_if",
+                "index": 0
             },
+            "title": "supersecret",
+            "next": [{
+                    "name": "check",
+                    "meta": {
+                        "execute": "e like_show"
+                    },
+                    "title": "👁️ Check",
+                    "expect": {
+                        "type": "list",
+                        "list": [
+                            ["👍", "👎"]
+                        ],
+                        "op": "none"
+                    },
+                    "next": {
+                        "name": "checkreaction",
+                        "meta": {
+                            "execute": "e like_reaction"
+                        },
+                        "next": {
+                            "name": "extra",
+                            "next": "root/menu"
+                        }
+                    }
+                },
+                {
+                    "name": "discard",
+                    "title": "✖️ Discard",
+                    "say": "Are you sure about discarding?",
+                    "next": [{
+                            "name": "yes",
+                            "meta": {
+                                "execute": "sd likes ."
+                            },
+                            "title": "discard!",
+                            "say": "✖️ list has been discarded",
+                            "next": "root/menu"
+                        },
+                        {
+                            "name": "no",
+                            "title": "cancel",
+                            "say": "Operation cancelled",
+                            "next": "root/liked"
+                        }
+                    ]
+                },
+                {
+                    "name": "later",
+                    "title": "⌛ Later",
+                    "say": "You can always check out who liked you later in the options menu",
+                    "next": "root/menu"
+                }
+            ]
+        },
+        {
+            "name": "sample_liked",
+            "meta": {
+                "index": 0,
+                "markup": "col",
+                "execute": "e likedcount"
+            },
+            "next": {
+                "name": "extra",
+                "meta": {
+                    "markup": "col"
+                },
+                "next": [{
+                        "name": "check",
+                        "meta": {
+                            "execute": "e like_show"
+                        },
+                        "expect": {
+                            "type": "list",
+                            "list": [
+                                ["👍", "👎"]
+                            ],
+                            "op": "none"
+                        },
+                        "next": {
+                            "name": "extra",
+                            "next": "root/menu"
+                        }
+                    }
+                },
+                {
+                    "name": "discard",
+                    "title": "✖️ Discard",
+                    "say": "Are you sure about discarding?",
+                    "next": [{
+                            "name": "yes",
+                            "meta": {
+                                "execute": "sd liked ."
+                            },
+                            "title": "discard!",
+                            "say": "✖️ list has been discarded",
+                            "next": "root/menu"
+                        },
+                        {
+                            "name": "no",
+                            "title": "cancel",
+                            "say": "Operation cancelled",
+                            "next": "root/liked"
+                        }
+                    },
+                    {
+                        "name": "discard",
+                        "say": "Are you sure about discarding?",
+                        "next": [{
+                                "name": "yes",
+                                "meta": {
+                                    "execute": "sd likes ."
+                                },
+                                "say": "✖️ list has been discarded",
+                                "next": "root/menu"
+                            },
+                            {
+                                "name": "no",
+                                "say": "Operation cancelled",
+                                "next": "root/liked"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "later",
+                        "title": "⌛ Later",
+                        "say": "You can always check out who liked you later in the options menu",
+                        "next": "root/menu"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "intro",
+            "say": "let's start\n❗️ Remember that on the Internet people can impersonate others; The bot does'nt authenticate to identify users.\nBy continuing, you're agreed to use the bot with your own responsibility.",
+            "markup": ["agree"],
             "next": {
                 "name": "name",
                 "say": "Sweet ^^\n\nnow we're setting up your identification, you may change some of these later.\nWhat is your name",
@@ -223,45 +348,39 @@
                             "name": "photo",
                             "say": "Send a photo",
                             "expect": {
-                                "type": "file",
-                                "op": "sd photo [MSG]"
+                                "type": "photo",
+                                "op": "sd photo [PHOTO]"
                             },
                             "next": {
                                 "name": "gender",
                                 "say": "what is your gender?\n\nchoose your gender and the gender you'r attracted to correctly you won't be able to change in later!(other than messaging admin)\nthe reason is to guarantee that you'll find the correct gender ;)",
+                                "markup": [
+                                    "male", "female"
+                                ],
                                 "expect": {
-                                    "type": "list",
-                                    "list": [
-                                        "male", "female"
-                                    ],
+                                    "type": "markup",
                                     "op": "s gender [MSG]"
                                 },
                                 "next": {
                                     "name": "attracted",
                                     "say": "Who are you looking for? (choose wisely !)",
+                                    "markup": [
+                                        "male", "female"
+                                    ],
                                     "expect": {
-                                        "type": "list",
-                                        "list": [
-                                            "male", "female"
-                                        ],
+                                        "type": "markup",
                                         "op": "sd attraction [MSG]"
                                     },
                                     "next": {
                                         "name": "desc",
-                                        "say": "a breif description of yourself (bio)",
+                                        "say": "a brief description of yourself (bio)",
                                         "expect": {
                                             "type": "text",
                                             "op": "sd description [MSG]"
                                         },
                                         "next": {
                                             "name": "menu",
-                                            "meta": {
-                                                "execute": [
-                                                    "e self",
-                                                    "sd status status_up"
-                                                ]
-                                            },
-                                            "say": "done ✔️, your profile will be shown like this",
+                                            "say": "/e profilecompleted",
                                             "next": "root/menu"
                                         }
                                     }
