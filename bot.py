@@ -5,6 +5,7 @@ import json
 import re
 import jsonpickle
 
+<<<<<<< HEAD
 CONF = j("conf.json")
 TOKEN = CONF["TOKEN"]
 DATABASE = CONF["DB"]

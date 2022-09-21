@@ -11,7 +11,6 @@ TOKEN = "253284677:AAGH-nxJuBFmuHWY8RL4E49pHgP-pvWpUkI"
 bot = telebot.TeleBot(TOKEN)
 DATABASE = "data.db"
 
-
 class Database:
     connectionString = None
     dry = False
@@ -48,7 +47,6 @@ class Database:
 
     def user_data(self, user_id):
         return self.execute("select * from users where user_id = ?", (user_id,))[0]
-
 
 class User:
     id = None
@@ -293,6 +291,21 @@ class Tree:
         else:
             return None
 
+def command(cmd, uid):
+    r = "python3 main.py " + str(uid) + " " + cmd
+    return subprocess.Popen(r.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
+
+def parse_fstr(obj, update):
+    if "fstr" in obj and "args" in obj:
+        res = obj["fstr"]
+        for i in range(len(obj["args"])):
+            cmd = obj["args"][i].replace("[ID]", str(update.chat.id)).replace(
+                "[MSG]", str(update.text))
+            res = res.replace("$%s" % i, command(
+                obj["args"][i], update.chat.id))
+        return res
+    else:
+        return None
 
 def newnode_callback(tree):
     if "meta" in tree.current:
@@ -304,20 +317,17 @@ def newnode_callback(tree):
                 for i in e:
                     command(i, tree.user.id)
 
-
 def download(url, name):
     r = requests.get(url, allow_redirects=True)
     f = open(name, 'wb')
     f.write(r.content)
     f.close()
 
-
 def tgdownload(file_id):
     gf = bot.get_file(file_id)
     download("https://api.telegram.org/file/bot%s/%s" %
              (TOKEN, gf.file_path), 'testfile')
     return gf
-
 
 def get_markup_by_array(val):
     if type(val) == list:
@@ -331,7 +341,6 @@ def get_markup_by_array(val):
         return markup
     return None
 
-
 def parse_fstr(obj, process):
     if "fstr" in obj and "args" in obj:
         args = obj["args"]
@@ -343,16 +352,13 @@ def parse_fstr(obj, process):
     else:
         return None
 
-
 def m(pattern, inp, insensitive=False):
     if insensitive:
         return re.findall(pattern, inp, re.I)
     return re.findall(pattern, inp)
 
-
 def randstr(l=16, chars="abcdef0123456789"):
     return ''.join(random.choices(chars, k=l))
-
 
 def j(p):
     f = open(p, "r")
