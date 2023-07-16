@@ -7,7 +7,7 @@ import random
 import json
 import re
 
-TOKEN = "253284677:AAGH-nxJuBFmuHWY8RL4E49pHgP-pvWpUkI"
+TOKEN = "TOKEN"
 bot = telebot.TeleBot(TOKEN)
 DATABASE = "data.db"
 
